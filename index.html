@@ -63,20 +63,18 @@ footer{text-align:center;color:#64748b;font-size:10px;padding:5px}
     </div>
     <div class="notice" style="margin:8px 0;padding:8px 10px;font-size:12px">
       Jika modul tidak dapat dipaparkan di dalam portal, buka terus:
-      <a id="warden-open-link" href="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec" target="_blank" rel="noopener">Borang Warden</a>
+      <a id="warden-open-link" href="warden.html" target="_blank" rel="noopener">Borang Warden</a>
       · <a id="warden-dashboard-link" href="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard" target="_blank" rel="noopener">Dashboard Warden</a>
     </div>
     <div class="framewrap">
-      <iframe id="warden-frame" title="Modul Warden Bertugas"
-        src="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec">
-      </iframe>
+      <iframe id="warden-frame" title="Modul Warden Bertugas" src="warden.html"></iframe>
     </div>
   </section>
 </main>
 <footer>© SMadJiwa · e-Laporan Harian</footer>
 
 <script>
-const WARDEN_FORM='https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec';
+const WARDEN_FORM='warden.html';
 const WARDEN_DASH='https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard';
 
 function selectMain(which){
@@ -100,8 +98,8 @@ function selectWarden(which){
   document.getElementById('warden-form-btn').classList.toggle('active',which==='form');
   document.getElementById('warden-dashboard-btn').classList.toggle('active',which==='dashboard');
 }
-// Iframe errors caused by X-Frame-Options/CSP cannot be detected reliably by parent.
-// The fallback link remains available if the Warden web app refuses embedding.
+// Borang Warden dimuatkan daripada fail statik warden.html di GitHub Pages.
+// Dashboard Warden kekal menggunakan deployment GAS sedia ada.
 </script>
 </body>
 </html>
