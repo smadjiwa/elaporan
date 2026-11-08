@@ -202,108 +202,58 @@
     };
 
     function loadWardenList() {
-        const w1 = document.getElementById('warden1');
-        const w2 = document.getElementById('warden2');
-
-        // Paparkan status sementara pada kedua-dua dropdown.
-        w1.replaceChildren(new Option("Memuatkan senarai warden...", ""));
-        w2.replaceChildren(new Option("Memuatkan senarai warden...", ""));
-        w1.disabled = true;
-        w2.disabled = true;
-
-        // Nama callback unik mengelakkan pertembungan jika fungsi dipanggil semula.
-        const callbackName = "wardenListCallback_" + Date.now() + "_" +
-            Math.floor(Math.random() * 100000);
-        const script = document.createElement("script");
-        let finished = false;
-
-        function cleanup() {
-            if (finished) return;
-            finished = true;
-            clearTimeout(timer);
-            script.onerror = null;
-            if (script.parentNode) script.parentNode.removeChild(script);
-            try {
-                delete window[callbackName];
-            } catch (e) {
-                window[callbackName] = undefined;
-            }
-        }
-
-        function showError(message) {
-            cleanup();
-            w1.replaceChildren(new Option("Senarai warden gagal dimuatkan", ""));
-            w2.replaceChildren(new Option("Senarai warden gagal dimuatkan", ""));
-            w1.disabled = true;
-            w2.disabled = true;
-            console.error("[e-Laporan Warden] " + message);
-        }
-
-        window[callbackName] = function(result) {
-            if (finished) return;
-
-            if (result && !Array.isArray(result) && result.error) {
-                showError(result.message || "API GAS memulangkan ralat.");
-                return;
-            }
-
-            if (!Array.isArray(result)) {
-                showError("Respons API bukan senarai. Semak deployment GAS action=listWarden.");
-                return;
-            }
-
-            const names = result
-                .map(name => String(name == null ? "" : name).trim())
-                .filter(name => name !== "");
-
-            if (names.length === 0) {
-                showError("API berjaya dicapai tetapi tiada nama ditemui dalam tab Senarai_Warden.");
-                return;
-            }
-
-            cleanup();
-
-            w1.replaceChildren(new Option("-- Pilih Warden 1 --", ""));
-            w2.replaceChildren(new Option("-- (Pilihan) Warden 2 --", ""));
-
-            names.forEach(name => {
-                w1.add(new Option(name, name));
-                w2.add(new Option(name, name));
+        const callbackName = "wardenListCallback";
+        window[callbackName] = function(list) {
+            const w1 = document.getElementById('warden1');
+            const w2 = document.getElementById('warden2');
+            w1.innerHTML = '';
+            w2.innerHTML = '';
+            w1.add(new Option("-- Pilih Warden 1 --", ""));
+            w2.add(new Option("-- (Pilihan) Warden 2 --", ""));
+            (Array.isArray(list) ? list : []).forEach(n => {
+                w1.add(new Option(n, n));
+                w2.add(new Option(n, n));
             });
-
-            w1.disabled = false;
-            w2.disabled = false;
-            console.info("[e-Laporan Warden] " + names.length + " nama warden berjaya dimuatkan.");
+            delete window[callbackName];
+            const script = document.getElementById('warden-list-script');
+            if (script) script.remove();
+            if (!Array.isArray(list)) alert("Tidak berjaya mendapatkan senarai warden.");
         };
 
+        const script = document.createElement('script');
+        script.id = 'warden-list-script';
         script.onerror = function() {
-            showError("Tidak dapat memuatkan skrip API GAS. Semak URL deployment dan akses Anyone.");
+            alert("Gagal mendapatkan senarai warden. Semak deployment GAS dan kebenaran akses.");
+            script.remove();
         };
-
-        const timer = window.setTimeout(function() {
-            showError("Tiada respons API selepas 15 saat. Pastikan deployment GAS mengandungi action=listWarden dan akses Anyone.");
-        }, 15000);
-
-        script.src = WARDEN_API_URL +
-            "?action=listWarden&callback=" + encodeURIComponent(callbackName) +
-            "&_=" + Date.now();
-
+        script.src = WARDEN_API_URL + "?action=listWarden&callback=" + callbackName + "&_=" + Date.now();
         document.head.appendChild(script);
     }
 
-    // Terima keputusan simpanan daripada halaman respons GAS di iframe tersembunyi.
-    window.addEventListener('message', function(event) {
-        const senderHost = (() => {
-            try { return new URL(event.origin).hostname; } catch (_) { return ''; }
-        })();
-        const trustedSender = senderHost === 'script.google.com' ||
-            senderHost.endsWith('.googleusercontent.com');
-        if (!trustedSender) return;
-        if (!event.data || event.data.type !== 'WARDEN_UPLOAD_RESULT') return;
+    // Terima pengesahan hanya daripada iframe yang menghantar PDF.
+    let wardenUploadWatchdog = null;
+
+    function closeWardenLoader(message, showMessage) {
+        if (wardenUploadWatchdog) {
+            clearTimeout(wardenUploadWatchdog);
+            wardenUploadWatchdog = null;
+        }
+
         wardenRequestPending = false;
         document.getElementById('loader').style.display = "none";
         document.body.classList.remove('generating-pdf');
-        alert(event.data.message || "Permintaan selesai.");
+
+        if (showMessage && message) alert(message);
+    }
+
+    window.addEventListener('message', function(event) {
+        const frame = document.getElementById('warden-upload-frame');
+
+        // Semak sumber mesej secara khusus: iframe penghantaran laporan.
+        if (!frame || event.source !== frame.contentWindow) return;
+        if (!event.data || event.data.type !== 'WARDEN_UPLOAD_RESULT') return;
+
+        closeWardenLoader(event.data.message || "Laporan berjaya diproses.", true);
     });
 
     function updateDate() {
@@ -430,6 +380,17 @@
 
         document.body.appendChild(form);
         wardenRequestPending = true;
+
+        // Pengesahan normal datang melalui postMessage daripada GAS.
+        // Fallback ini mengelakkan loader kekal jika browser menyekat mesej respons.
+        if (wardenUploadWatchdog) clearTimeout(wardenUploadWatchdog);
+        wardenUploadWatchdog = setTimeout(function() {
+            closeWardenLoader(
+                "Permintaan telah dihantar. Sila semak rekod Google Sheets atau Dashboard sebelum menghantar semula.",
+                true
+            );
+        }, 12000);
+
         form.submit();
     }
 </script>
