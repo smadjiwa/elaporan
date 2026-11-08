@@ -1,244 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#173b68">
-  <title>e-Laporan Harian | SMadJiwa</title>
-  <style>
-    :root {
-      --navy: #173b68;
-      --blue: #2463a6;
-      --bg: #f3f6fb;
-      --ink: #172033;
-      --muted: #64748b;
-      --line: #dce4ef;
-      --white: #fff;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-    }
-    .school-header {
-      background: linear-gradient(135deg, #102d50, #245b91);
-      color: white;
-      text-align: center;
-      padding: 24px 16px 20px;
-    }
-    .school-logo {
-      width: 92px;
-      height: 92px;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto 12px;
-      background: white;
-      border-radius: 50%;
-      padding: 5px;
-    }
-    .school-name {
-      margin: 0;
-      font-size: clamp(17px, 3vw, 23px);
-      line-height: 1.3;
-      font-weight: 800;
-      letter-spacing: .35px;
-    }
-    .portal-title {
-      margin: 13px 0 4px;
-      font-size: clamp(21px, 4vw, 29px);
-      letter-spacing: .7px;
-      font-weight: 800;
-    }
-    .portal-subtitle {
-      margin: 0;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      opacity: .85;
-    }
-    .tabbar {
-      display: flex;
-      gap: 8px;
-      padding: 12px;
-      max-width: 1100px;
-      margin: 0 auto;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      background: rgba(243,246,251,.96);
-      backdrop-filter: blur(8px);
-    }
-    .tab-button {
-      flex: 1;
-      min-height: 50px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: white;
-      color: #334155;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: .18s ease;
-    }
-    .tab-button:hover { border-color: var(--blue); }
-    .tab-button.active {
-      background: var(--navy);
-      border-color: var(--navy);
-      color: white;
-      box-shadow: 0 4px 12px #173b682b;
-    }
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 4px 12px 28px;
-    }
-    .module-panel {
-      display: none;
-      background: white;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      min-height: 420px;
-      padding: clamp(18px, 4vw, 30px);
-      box-shadow: 0 5px 22px #14213b0b;
-    }
-    .module-panel.active { display: block; }
-    .module-heading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .module-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      font-size: 23px;
-      background: #eaf2ff;
-    }
-    #warden .module-icon { background: #f0eaff; }
-    .module-heading h2 { margin: 0 0 4px; font-size: 20px; }
-    .module-heading p { margin: 0; color: var(--muted); font-size: 13px; }
-    .integration-notice {
-      padding: 18px;
-      border: 1px dashed #b8c8dc;
-      border-radius: 12px;
-      background: #f8fbff;
-      color: #475569;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-    .integration-notice strong { color: var(--navy); }
-    .source-link {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 14px;
-      padding: 11px 16px;
-      border-radius: 9px;
-      color: white;
-      background: var(--blue);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .source-link:hover { background: var(--navy); }
-    footer {
-      text-align: center;
-      padding: 4px 12px 22px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-    @media (max-width: 520px) {
-      .school-header { padding-top: 19px; }
-      .school-logo { width: 76px; height: 76px; }
-      .tabbar { padding: 9px; gap: 7px; }
-      .tab-button { min-height: 48px; font-size: 12px; padding: 7px 4px; }
-      .module-panel { min-height: 380px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173b68">
+<title>e-Laporan Harian | SMadJiwa</title>
+<style>
+:root{--navy:#173b68;--blue:#245b91;--bg:#f1f5f9;--line:#dbe3ee}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#172033}
+header{background:linear-gradient(135deg,#102d50,#245b91);color:#fff;text-align:center;padding:18px 12px 16px}
+.logo{width:82px;height:82px;object-fit:contain;background:#fff;border-radius:50%;padding:4px;margin:0 auto 9px;display:block}
+.school{font-size:clamp(17px,3vw,23px);line-height:1.3;font-weight:800;margin:0}
+.heading{font-size:clamp(21px,4vw,29px);font-weight:800;margin:11px 0 3px;letter-spacing:.5px}
+.subheading{font-size:11px;letter-spacing:1.4px;margin:0;opacity:.88}
+.tabs{display:flex;gap:8px;padding:10px;max-width:1200px;margin:auto;position:sticky;top:0;z-index:20;background:#f1f5f9}
+.tab{flex:1;border:1px solid var(--line);background:white;color:#334155;border-radius:10px;padding:14px 8px;font-weight:800;font-size:14px;cursor:pointer}
+.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+main{max-width:1400px;margin:auto;padding:0 10px 24px}
+.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;min-height:75vh}
+.panel.active{display:block}
+.subtabs{display:flex;gap:7px;padding:9px;background:#eaf0f7;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.subtab{border:0;border-radius:8px;padding:10px 14px;background:#fff;color:#24364b;font-weight:700;cursor:pointer}
+.subtab.active{background:#245b91;color:white}
+.framewrap{height:calc(100vh - 205px);min-height:600px}
+iframe{width:100%;height:100%;border:0;display:block;background:white}
+.notice{padding:24px;margin:16px;border:1px dashed #b6c5d8;border-radius:10px;background:#f8fbff;color:#475569;line-height:1.6}
+.notice a{color:#1558a6;font-weight:700}
+.loading{padding:30px;text-align:center;color:#64748b}
+footer{text-align:center;color:#64748b;font-size:11px;padding:12px}
+@media(max-width:600px){.logo{width:68px;height:68px}.tab{font-size:12px;padding:12px 5px}.framewrap{height:calc(100vh - 190px);min-height:560px}.subtab{font-size:12px;padding:9px}}
+</style>
 </head>
 <body>
-  <header class="school-header">
-    <img
-      class="school-logo"
-      src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SM_Sains_Sultan_Mohamad_JIWA_logo.png"
-      alt="Logo Sekolah Menengah Sains Sultan Mohamad Jiwa"
-      onerror="this.style.display='none'">
-    <h1 class="school-name">SEKOLAH MENENGAH SAINS<br>SULTAN MOHAMAD JIWA</h1>
-    <div class="portal-title">e-LAPORAN HARIAN</div>
-    <p class="portal-subtitle">SISTEM PELAPORAN BERSEPADU SMADJIWA</p>
-  </header>
+<header>
+  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SM_Sains_Sultan_Mohamad_JIWA_logo.png" alt="Logo SMadJiwa">
+  <h1 class="school">SEKOLAH MENENGAH SAINS<br>SULTAN MOHAMAD JIWA</h1>
+  <div class="heading">e-LAPORAN HARIAN</div>
+  <p class="subheading">SISTEM PELAPORAN BERSEPADU SMADJIWA</p>
+</header>
 
-  <nav class="tabbar" role="tablist" aria-label="Pilihan modul laporan">
-    <button class="tab-button active" id="tab-guru" role="tab"
-      aria-selected="true" aria-controls="guru" onclick="showModule('guru')">
-      📋 GURU BERTUGAS
-    </button>
-    <button class="tab-button" id="tab-warden" role="tab"
-      aria-selected="false" aria-controls="warden" onclick="showModule('warden')">
-      🛡️ WARDEN BERTUGAS
-    </button>
-  </nav>
+<nav class="tabs" role="tablist">
+  <button class="tab active" id="tab-guru" onclick="selectMain('guru')">📋 GURU BERTUGAS</button>
+  <button class="tab" id="tab-warden" onclick="selectMain('warden')">🛡️ WARDEN BERTUGAS</button>
+</nav>
 
-  <main>
-    <section class="module-panel active" id="guru" role="tabpanel" aria-labelledby="tab-guru">
-      <div class="module-heading">
-        <div class="module-icon">📋</div>
-        <div>
-          <h2>Laporan Guru Bertugas</h2>
-          <p>Modul pelaporan guru bertugas harian</p>
-        </div>
-      </div>
-      <div class="integration-notice">
-        <strong>Ruang integrasi modul Guru Bertugas.</strong><br>
-        Portal dan tab telah disediakan. Kod sumber asal modul Guru Bertugas perlu
-        dimasukkan di sini supaya borang, rekod, muat naik gambar dan fungsi PDF
-        dapat dikekalkan dalam portal baharu.
-        <br>
-        <a class="source-link"
-          href="https://sites.google.com/moe-dl.edu.my/gurubertugassmadj/pelaporan-guru-bertugas"
-          target="_blank" rel="noopener">Buka sistem asal Guru Bertugas ↗</a>
-      </div>
-    </section>
+<main>
+  <section class="panel active" id="panel-guru">
+    <div class="subtabs">
+      <button class="subtab active" id="guru-form-btn" onclick="selectGuru('form')">Borang Laporan Guru</button>
+      <button class="subtab" id="guru-record-btn" onclick="selectGuru('record')">Rekod Pelaporan</button>
+    </div>
+    <div class="framewrap">
+      <iframe id="guru-frame" title="Modul Guru Bertugas" src="guru.html"></iframe>
+    </div>
+  </section>
 
-    <section class="module-panel" id="warden" role="tabpanel" aria-labelledby="tab-warden" hidden>
-      <div class="module-heading">
-        <div class="module-icon">🛡️</div>
-        <div>
-          <h2>Laporan Warden Bertugas</h2>
-          <p>Modul pelaporan warden bertugas harian</p>
-        </div>
-      </div>
-      <div class="integration-notice">
-        <strong>Ruang integrasi modul Warden Bertugas.</strong><br>
-        Kod sumber asal modul Warden Bertugas perlu dimasukkan di sini.
-        Google Sites asal tidak boleh dipaparkan melalui iframe kerana sekatan
-        keselamatan laman tersebut.
-        <br>
-        <a class="source-link"
-          href="https://sites.google.com/moe-dl.edu.my/laporan-warden?usp=sharing"
-          target="_blank" rel="noopener">Buka sistem asal Warden Bertugas ↗</a>
-      </div>
-    </section>
-  </main>
+  <section class="panel" id="panel-warden">
+    <div class="subtabs">
+      <button class="subtab active" id="warden-form-btn" onclick="selectWarden('form')">Borang Warden</button>
+      <button class="subtab" id="warden-dashboard-btn" onclick="selectWarden('dashboard')">Dashboard Warden</button>
+    </div>
+    <div class="framewrap">
+      <iframe id="warden-frame" title="Modul Warden Bertugas"
+        src="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec">
+      </iframe>
+    </div>
+    <div id="warden-fallback" class="notice" hidden>
+      <strong>Halaman Warden tidak dibenarkan dipaparkan dalam portal.</strong><br>
+      Ini biasanya berlaku jika Apps Script belum membenarkan paparan iframe.
+      Dalam projek GAS Warden, tetapkan <code>XFrameOptionsMode.ALLOWALL</code>
+      pada output <code>doGet()</code>, kemudian deploy versi baharu.
+      <p><a id="warden-open-link" href="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec" target="_blank" rel="noopener">Buka modul Warden dalam tab baharu</a></p>
+    </div>
+  </section>
+</main>
+<footer>© SMadJiwa · e-Laporan Harian</footer>
 
-  <footer>© SMadJiwa · e-Laporan Harian</footer>
+<script>
+const WARDEN_FORM='https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec';
+const WARDEN_DASH='https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard';
 
-  <script>
-    function showModule(moduleId) {
-      const ids = ['guru', 'warden'];
-      ids.forEach(id => {
-        const panel = document.getElementById(id);
-        const button = document.getElementById('tab-' + id);
-        const selected = id === moduleId;
-        panel.classList.toggle('active', selected);
-        panel.hidden = !selected;
-        button.classList.toggle('active', selected);
-        button.setAttribute('aria-selected', String(selected));
-      });
-    }
-  </script>
+function selectMain(which){
+  ['guru','warden'].forEach(id=>{
+    document.getElementById('panel-'+id).classList.toggle('active',id===which);
+    document.getElementById('tab-'+id).classList.toggle('active',id===which);
+  });
+}
+function selectGuru(which){
+  const frame=document.getElementById('guru-frame');
+  frame.src=which==='form'?'guru.html':'rekod-guru.html';
+  document.getElementById('guru-form-btn').classList.toggle('active',which==='form');
+  document.getElementById('guru-record-btn').classList.toggle('active',which==='record');
+}
+function selectWarden(which){
+  const url=which==='form'?WARDEN_FORM:WARDEN_DASH;
+  const frame=document.getElementById('warden-frame');
+  frame.src=url;
+  document.getElementById('warden-open-link').href=url;
+  document.getElementById('warden-form-btn').classList.toggle('active',which==='form');
+  document.getElementById('warden-dashboard-btn').classList.toggle('active',which==='dashboard');
+}
+// Iframe errors caused by X-Frame-Options/CSP cannot be detected reliably by parent.
+// The fallback link remains available if the Warden web app refuses embedding.
+</script>
 </body>
 </html>
