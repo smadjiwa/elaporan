@@ -230,30 +230,31 @@
         document.head.appendChild(script);
     }
 
-    // Terima pengesahan hanya daripada iframe yang menghantar PDF.
+    // Kawalan loader: tutup apabila respons GAS diterima atau selepas had masa.
     let wardenUploadWatchdog = null;
 
-    function closeWardenLoader(message, showMessage) {
+    function closeWardenLoader() {
         if (wardenUploadWatchdog) {
             clearTimeout(wardenUploadWatchdog);
             wardenUploadWatchdog = null;
         }
-
         wardenRequestPending = false;
         document.getElementById('loader').style.display = "none";
         document.body.classList.remove('generating-pdf');
-
-        if (showMessage && message) alert(message);
     }
 
+    // Terima keputusan simpanan daripada halaman respons GAS di iframe tersembunyi.
     window.addEventListener('message', function(event) {
-        const frame = document.getElementById('warden-upload-frame');
-
-        // Semak sumber mesej secara khusus: iframe penghantaran laporan.
-        if (!frame || event.source !== frame.contentWindow) return;
+        const senderHost = (() => {
+            try { return new URL(event.origin).hostname; } catch (_) { return ''; }
+        })();
+        const trustedSender = senderHost === 'script.google.com' ||
+            senderHost.endsWith('.googleusercontent.com');
+        if (!trustedSender) return;
         if (!event.data || event.data.type !== 'WARDEN_UPLOAD_RESULT') return;
 
-        closeWardenLoader(event.data.message || "Laporan berjaya diproses.", true);
+        closeWardenLoader();
+        alert(event.data.message || "Permintaan selesai.");
     });
 
     function updateDate() {
@@ -381,14 +382,10 @@
         document.body.appendChild(form);
         wardenRequestPending = true;
 
-        // Pengesahan normal datang melalui postMessage daripada GAS.
-        // Fallback ini mengelakkan loader kekal jika browser menyekat mesej respons.
+        // Tutup overlay jika respons iframe tidak sampai ke GitHub Pages.
         if (wardenUploadWatchdog) clearTimeout(wardenUploadWatchdog);
         wardenUploadWatchdog = setTimeout(function() {
-            closeWardenLoader(
-                "Permintaan telah dihantar. Sila semak rekod Google Sheets atau Dashboard sebelum menghantar semula.",
-                true
-            );
+            closeWardenLoader();
         }, 12000);
 
         form.submit();
