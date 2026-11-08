@@ -185,115 +185,57 @@
 
 <button class="btn-save" onclick="hantarLaporan()">Hantar Laporan & Simpan ke Drive</button>
 
-<div style="text-align:center; margin:20px 0;"><a href="https://script.google.com/macros/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard" target="_blank" rel="noopener" style="color:#666; font-size:12px;">Buka Dashboard Analisis</a></div>
+<div style="text-align:center; margin:20px 0;"><a href="<?= ScriptApp.getService().getUrl() ?>?v=dashboard" style="color:#666; font-size:12px;">Buka Dashboard Analisis</a></div>
 
 <script>
-    // GitHub Pages frontend: data and PDF storage remain in the existing GAS backend.
-    const WARDEN_API_URL = "https://script.google.com/macros/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec";
-    const WARDEN_PARENT_ORIGIN = "https://smadjiwa.github.io";
-    let wardenRequestPending = false;
-
     window.onload = function() {
-        loadWardenList();
-        const today = new Date();
-        document.getElementById('dateInput').value = today.toISOString().split('T')[0];
-        updateDate();
-        syncPDF();
+        google.script.run.withSuccessHandler(list => {
+            const w1 = document.getElementById('warden1'); const w2 = document.getElementById('warden2');
+            w1.add(new Option("-- Pilih Warden 1 --", "")); w2.add(new Option("-- (Pilihan) Warden 2 --", ""));
+            list.forEach(n => { w1.add(new Option(n, n)); w2.add(new Option(n, n)); });
+        }).getWardenList();
+        const today = new Date(); document.getElementById('dateInput').value = today.toISOString().split('T')[0]; updateDate();
     };
 
-    function loadWardenList() {
-        const callbackName = "wardenListCallback";
-        window[callbackName] = function(list) {
-            const w1 = document.getElementById('warden1');
-            const w2 = document.getElementById('warden2');
-            w1.innerHTML = '';
-            w2.innerHTML = '';
-            w1.add(new Option("-- Pilih Warden 1 --", ""));
-            w2.add(new Option("-- (Pilihan) Warden 2 --", ""));
-            (Array.isArray(list) ? list : []).forEach(n => {
-                w1.add(new Option(n, n));
-                w2.add(new Option(n, n));
-            });
-            delete window[callbackName];
-            const script = document.getElementById('warden-list-script');
-            if (script) script.remove();
-            if (!Array.isArray(list)) alert("Tidak berjaya mendapatkan senarai warden.");
-        };
-
-        const script = document.createElement('script');
-        script.id = 'warden-list-script';
-        script.onerror = function() {
-            alert("Gagal mendapatkan senarai warden. Semak deployment GAS dan kebenaran akses.");
-            script.remove();
-        };
-        script.src = WARDEN_API_URL + "?action=listWarden&callback=" + callbackName + "&_=" + Date.now();
-        document.head.appendChild(script);
-    }
-
-    // Terima keputusan simpanan daripada halaman respons GAS di iframe tersembunyi.
-    window.addEventListener('message', function(event) {
-        const senderHost = (() => {
-            try { return new URL(event.origin).hostname; } catch (_) { return ''; }
-        })();
-        const trustedSender = senderHost === 'script.google.com' ||
-            senderHost.endsWith('.googleusercontent.com');
-        if (!trustedSender) return;
-        if (!event.data || event.data.type !== 'WARDEN_UPLOAD_RESULT') return;
-        wardenRequestPending = false;
-        document.getElementById('loader').style.display = "none";
-        document.body.classList.remove('generating-pdf');
-        alert(event.data.message || "Permintaan selesai.");
-    });
-
     function updateDate() {
-        const val = document.getElementById('dateInput').value;
-        if(!val) return;
-        const days = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
-        const d = new Date(val + 'T00:00:00');
+        const val = document.getElementById('dateInput').value; if(!val) return;
+        const days = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu']; const d = new Date(val);
         document.getElementById('daySelect').value = days[d.getDay()];
-        const p = val.split('-');
-        document.getElementById('pDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
+        const p = val.split('-'); document.getElementById('pDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
         document.getElementById('pHari').innerText = days[d.getDay()];
     }
 
     function syncPDF() {
-        const n1 = document.getElementById('warden1').value;
-        const n2 = document.getElementById('warden2').value;
+        const n1 = document.getElementById('warden1').value; const n2 = document.getElementById('warden2').value;
         document.getElementById('outW1').innerText = n1 ? n1.toUpperCase() : "( NAMA WARDEN 1 )";
         document.getElementById('outW2').innerText = n2 ? n2.toUpperCase() : "( TIADA )";
-        document.getElementById('pW1').innerText = n1;
-        document.getElementById('pW2').innerText = n2 || "TIADA";
+        document.getElementById('pW1').innerText = n1; document.getElementById('pW2').innerText = n2 || "TIADA";
         document.getElementById('pSesi').innerText = document.getElementById('sesiSelect').value;
     }
 
     function previewImg(event, id) {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById(id);
-                img.src = e.target.result;
-                img.style.display = "block";
-            };
-            reader.readAsDataURL(file);
-        }
+        if (file) { const reader = new FileReader(); reader.onload = e => { const img = document.getElementById(id); img.src = e.target.result; img.style.display = "block"; }; reader.readAsDataURL(file); }
     }
 
-    function resetImg(id) {
-        const img = document.getElementById(id);
-        if(confirm("Padam?")) {
-            img.src = "";
-            img.style.display = "none";
-            img.previousElementSibling.value = "";
-        }
-    }
+    function resetImg(id) { const img = document.getElementById(id); if(confirm("Padam?")) { img.src = ""; img.style.display = "none"; img.previousElementSibling.value = ""; } }
 
     async function hantarLaporan() {
-        if (wardenRequestPending) return;
-        if(!document.getElementById('warden1').value) return alert("Pilih Warden 1!");
+        const warden1 = document.getElementById('warden1').value;
+        if (!warden1) return alert("Pilih Warden 1!");
 
         const loader = document.getElementById('loader');
+        const loaderText = loader.querySelector('div');
+        const setStatus = (message) => {
+            if (loaderText) loaderText.textContent = message;
+        };
+        const finish = () => {
+            loader.style.display = "none";
+            document.body.classList.remove('generating-pdf');
+        };
+
         loader.style.display = "flex";
+        setStatus("Menyediakan PDF...");
         syncPDF();
 
         document.querySelectorAll('.s-val').forEach((s, i) => {
@@ -305,71 +247,61 @@
         document.getElementById('pSakit').innerText = document.getElementById('iSakit').value;
         document.getElementById('pLain').innerText = document.getElementById('iLain').value;
 
-        try {
-            document.body.classList.add('generating-pdf');
-            const element = document.getElementById('reportContent');
-            const opt = {
-                margin: 0,
-                filename: 'temp.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+        document.body.classList.add('generating-pdf');
 
-            const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-            const p = document.getElementById('dateInput').value.split('-');
+        const element = document.getElementById('reportContent');
+        const opt = {
+            margin: 0,
+            filename: 'temp.pdf',
+            image: { type: 'jpeg', quality: 0.84 },
+            html2canvas: {
+                scale: 1.7,
+                useCORS: true,
+                scrollY: 0,
+                imageTimeout: 10000,
+                logging: false
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            await new Promise(resolve => requestAnimationFrame(() =>
+                requestAnimationFrame(resolve)
+            ));
+
+            const pdfBase64 = await html2pdf()
+                .set(opt)
+                .from(element)
+                .outputPdf('datauristring');
+
+            setStatus("PDF siap. Menghantar ke Google Drive...");
+
+            const dateParts = document.getElementById('dateInput').value.split('-');
             const info = {
-                filename: `${p[1]}${p[2]}${p[0]} - ${document.getElementById('warden1').value.toUpperCase()}.pdf`,
+                filename: `${dateParts[1]}${dateParts[2]}${dateParts[0]} - ${warden1.toUpperCase()}.pdf`,
                 tarikh: document.getElementById('dateInput').value,
                 hari: document.getElementById('daySelect').value,
-                warden1: document.getElementById('warden1').value,
+                warden1: warden1,
                 warden2: document.getElementById('warden2').value || "TIADA"
             };
 
-            submitPdfToGas(pdfBase64, info);
+            google.script.run
+                .withSuccessHandler(msg => {
+                    finish();
+                    alert(msg || "Proses simpanan selesai.");
+                })
+                .withFailureHandler(error => {
+                    finish();
+                    alert("Gagal menyimpan laporan: " +
+                        (error && error.message ? error.message : String(error)));
+                })
+                .uploadLaporan(pdfBase64, info);
+
         } catch (error) {
-            loader.style.display = "none";
-            document.body.classList.remove('generating-pdf');
-            alert("Gagal menjana PDF: " + error.message);
+            finish();
+            alert("Gagal menjana PDF: " +
+                (error && error.message ? error.message : String(error)));
         }
-    }
-
-    function submitPdfToGas(pdfBase64, info) {
-        let frame = document.getElementById('warden-upload-frame');
-        if (!frame) {
-            frame = document.createElement('iframe');
-            frame.name = 'warden-upload-frame';
-            frame.id = 'warden-upload-frame';
-            frame.style.display = 'none';
-            document.body.appendChild(frame);
-        }
-
-        let form = document.getElementById('warden-upload-form');
-        if (form) form.remove();
-        form = document.createElement('form');
-        form.id = 'warden-upload-form';
-        form.method = 'POST';
-        form.action = WARDEN_API_URL;
-        form.target = 'warden-upload-frame';
-        form.style.display = 'none';
-
-        const fields = {
-            action: 'uploadReport',
-            pdfBase64: pdfBase64,
-            info: JSON.stringify(info),
-            parentOrigin: WARDEN_PARENT_ORIGIN
-        };
-        Object.entries(fields).forEach(([name, value]) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        wardenRequestPending = true;
-        form.submit();
     }
 </script>
 </body>
