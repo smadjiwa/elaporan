@@ -28,3 +28,10 @@ polisi keselamatan sekolah dan pastikan aplikasi mempunyai kawalan akses yang be
 - Rekod Guru menggunakan URL Apps Script asal yang sudah tertanam dalam fail asal.
 - Dashboard Warden kekal menggunakan URL yang diberikan.
 - Ini ialah integrasi frontend; tiada perubahan dibuat pada spreadsheet atau deployment backend.
+
+
+## Pautan Warden yang digunakan
+- Borang Warden: `https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec`
+- Dashboard Warden: `https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard`
+
+Pautan terus disediakan di bawah iframe sebagai pilihan jika pelayar atau Apps Script menyekat paparan terbenam.
