@@ -185,16 +185,84 @@
 
 <button class="btn-save" onclick="hantarLaporan()">Hantar Laporan & Simpan ke Drive</button>
 
-<div style="text-align:center; margin:20px 0;"><a href="<?= ScriptApp.getService().getUrl() ?>?v=dashboard" style="color:#666; font-size:12px;">Buka Dashboard Analisis</a></div>
+<div style="text-align:center; margin:20px 0;"><a href="https://script.google.com/macros/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec?v=dashboard" style="color:#666; font-size:12px;">Buka Dashboard Analisis</a></div>
 
 <script>
+    // GitHub Pages tidak menyediakan google.script.run.
+    // Ambil senarai warden melalui API JSONP pada deployment GAS yang sama.
+    const WARDEN_API_URL = "https://script.google.com/macros/s/AKfycbxQZxZ45iAHdpqreZ7opIqaVCH6tunNyPM_UAtxLZKJBBwwu2rTTFS6k7vEzOjbwizroA/exec";
+
+    function loadWardenList() {
+        const w1 = document.getElementById('warden1');
+        const w2 = document.getElementById('warden2');
+
+        w1.replaceChildren(new Option("Memuatkan senarai warden...", ""));
+        w2.replaceChildren(new Option("Memuatkan senarai warden...", ""));
+        w1.disabled = true;
+        w2.disabled = true;
+
+        const callbackName = "wardenListCallback_" + Date.now();
+        const script = document.createElement("script");
+        const timeout = window.setTimeout(() => {
+            cleanup();
+            showError("Masa menunggu senarai warden tamat. Semak deployment GAS.");
+        }, 15000);
+
+        function cleanup() {
+            clearTimeout(timeout);
+            if (script.parentNode) script.parentNode.removeChild(script);
+            try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+        }
+
+        function showError(message) {
+            w1.replaceChildren(new Option("Gagal memuatkan senarai warden", ""));
+            w2.replaceChildren(new Option("Gagal memuatkan senarai warden", ""));
+            w1.disabled = true;
+            w2.disabled = true;
+            console.error(message);
+        }
+
+        window[callbackName] = function(list) {
+            cleanup();
+
+            if (!Array.isArray(list) || list.length === 0) {
+                showError("API berjaya dipanggil tetapi senarai warden kosong.");
+                return;
+            }
+
+            w1.replaceChildren(new Option("-- Pilih Warden 1 --", ""));
+            w2.replaceChildren(new Option("-- (Pilihan) Warden 2 --", ""));
+
+            list.forEach(name => {
+                const cleanName = String(name || "").trim();
+                if (!cleanName) return;
+                w1.add(new Option(cleanName, cleanName));
+                w2.add(new Option(cleanName, cleanName));
+            });
+
+            w1.disabled = false;
+            w2.disabled = false;
+        };
+
+        script.onerror = function() {
+            cleanup();
+            showError("Tidak dapat menghubungi API senarai warden.");
+        };
+
+        script.src = WARDEN_API_URL
+            + "?action=listWarden&callback="
+            + encodeURIComponent(callbackName)
+            + "&_=" + Date.now();
+
+        document.head.appendChild(script);
+    }
+
     window.onload = function() {
-        google.script.run.withSuccessHandler(list => {
-            const w1 = document.getElementById('warden1'); const w2 = document.getElementById('warden2');
-            w1.add(new Option("-- Pilih Warden 1 --", "")); w2.add(new Option("-- (Pilihan) Warden 2 --", ""));
-            list.forEach(n => { w1.add(new Option(n, n)); w2.add(new Option(n, n)); });
-        }).getWardenList();
-        const today = new Date(); document.getElementById('dateInput').value = today.toISOString().split('T')[0]; updateDate();
+        loadWardenList();
+
+        const today = new Date();
+        document.getElementById('dateInput').value = today.toISOString().split('T')[0];
+        updateDate();
     };
 
     function updateDate() {
