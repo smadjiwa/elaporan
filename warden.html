@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { background-color: #f0f0f0; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 10px; }
+        .page { width: 210mm; min-height: 297mm; padding: 10mm; margin: 0 auto; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ccc; box-sizing: border-box; }
+        
+        .header-section { border-bottom: 2px solid black; padding-bottom: 2px; margin-bottom: 5px; }
+        .header-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .school-logo { height: 65px; width: auto; }
+        .header-text { text-align: left; }
+        .header-text h3 { margin: 0; font-size: 8.5pt; font-weight: normal; }
+        .header-text h2 { margin: 1px 0; text-transform: uppercase; font-size: 12pt; font-weight: bold; }
+        .header-text p { margin: 0; font-size: 7.5pt; font-style: italic; }
+
+        .warden-info-section { width: 100%; margin-bottom: 5px; padding-bottom: 3px; border-bottom: 1px dashed #999; }
+        .info-row { display: flex; gap: 8px; margin-bottom: 3px; }
+        .info-col { flex: 1; }
+        label { display: block; font-weight: bold; font-size: 0.7em; color: #333; }
+        input, select { width: 100%; padding: 2px 4px; border: 1px solid #aaa; font-size: 0.8em; height: 24px; box-sizing: border-box; }
+
+        .section-title { background-color: #222; color: white; padding: 2px 8px; font-weight: bold; margin-top: 8px; font-size: 0.8em; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+        th { background-color: #e0e0e0; border: 1px solid #000; padding: 2px; font-size: 0.75em; }
+        td { border: 1px solid #000; text-align: center; height: 24px; font-weight: bold; font-size: 0.9em; }
+        td select { width: 100%; border: none; text-align: center; background: transparent; font-weight: bold; appearance: none; }
+
+        .catatan-row { margin-top: 2px; margin-bottom: 4px; display: flex; align-items: flex-end; gap: 5px; }
+        .catatan-row label { width: 55px; font-style: italic; font-weight: bold; font-size: 0.7em; }
+        .catatan-line { flex: 1; border-bottom: 1px dotted #000; min-height: 16px; font-size: 0.85em; font-weight: bold; }
+
+        .report-box { margin-top: 5px; border: 1px solid #aaa; padding: 3px; background: #fff; }
+        .report-box label { font-size: 0.7em; margin-bottom: 1px; display: block; font-weight: bold; }
+        .report-text { min-height: 16px; font-size: 0.85em; font-weight: bold; }
+
+        .main-content { display: flex; flex-direction: row; gap: 10px; }
+        .form-column { flex: 7; }
+        .image-column { flex: 3; display: flex; flex-direction: column; gap: 8px; padding-left: 8px; border-left: 2px dashed #ccc; }
+        .lampiran-title { text-align: center; font-weight: bold; font-size: 11px; background-color: #e0e0e0; padding: 4px; border: 1px solid #999; text-transform: uppercase; }
+        .image-group { display: flex; flex-direction: column; width: 100%; border: 1px solid #999; }
+        .img-label { font-weight: bold; font-size: 10px; text-align: center; background-color: #e0e0e0; border-bottom: 1px solid #999; padding: 3px; }
+        .upload-box { background-color: #f9f9f9; width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .img-preview { width: 100% !important; height: auto !important; display: none; cursor: pointer; position: relative; z-index: 10; }
+
+        .signature-section { margin-top: 10px; display: flex; justify-content: space-between; }
+        .sig-box { text-align: center; width: 45%; }
+        .sig-line { border-bottom: 1px solid black; font-weight: bold; text-transform: uppercase; min-height: 14px; font-size: 0.75em; }
+
+        .pdf-only { display: none; }
+        body.generating-pdf { background: white; padding: 0; }
+        body.generating-pdf .page { width: 210mm; min-height: 0 !important; padding: 5mm 15mm 5mm 20mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+        body.generating-pdf .input-element, body.generating-pdf input[type="file"] { display: none !important; }
+        body.generating-pdf .pdf-only { display: block !important; }
+        body.generating-pdf .img-preview { display: block !important; }
+
+        .btn-save { width: 210mm; display: block; margin: 15px auto; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .loading { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:white; justify-content:center; align-items:center; z-index:9999; flex-direction:column; }
+    </style>
+</head>
+<body>
+
+<div id="loader" class="loading"><div>Menyimpan Laporan...</div></div>
+
+<div class="page" id="reportContent">
+    <div class="header-section">
+        <div class="header-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/SM_Sains_Sultan_Mohamad_Jiwa_logo.png" crossorigin="anonymous" class="school-logo">
+            <div class="header-text">
+                <h3>SEKOLAH MENENGAH SAINS SULTAN MOHAMAD JIWA</h3>
+                <h2>LAPORAN WARDEN BERTUGAS</h2>
+                <p>Jubli Emas 50 Tahun (1973-2023)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="warden-info-section">
+        <div class="info-row">
+            <div class="info-col">
+                <label>Tarikh:</label>
+                <input type="date" id="dateInput" class="input-element" onchange="updateDate()">
+                <div class="pdf-only" id="pDate" style="font-weight:bold;"></div>
+            </div>
+            <div class="info-col">
+                <label>Hari:</label>
+                <select id="daySelect" class="input-element">
+                    <option>Isnin</option><option>Selasa</option><option>Rabu</option><option>Khamis</option><option>Jumaat</option><option>Sabtu</option><option>Ahad</option>
+                </select>
+                <div class="pdf-only" id="pHari" style="font-weight:bold;"></div>
+            </div>
+            <div class="info-col">
+                <label>Sesi:</label>
+                <select id="sesiSelect" class="input-element">
+                    <option selected>Malam</option><option>Siang</option>
+                </select>
+                <div class="pdf-only" id="pSesi" style="font-weight:bold;"></div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-col">
+                <label>Warden 1:</label>
+                <select id="warden1" class="input-element" onchange="syncPDF()"></select>
+                <div class="pdf-only" id="pW1" style="font-weight:bold;"></div>
+            </div>
+            <div class="info-col">
+                <label>Warden 2:</label>
+                <select id="warden2" class="input-element" onchange="syncPDF()"></select>
+                <div class="pdf-only" id="pW2" style="font-weight:bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="form-column">
+            <div class="section-title" style="margin-top:0;">1. SOLAT</div>
+            <table>
+                <tr><th>Subuh</th><th>Zuhur</th><th>Asar</th><th>Maghrib</th><th>Isyak</th></tr>
+                <tr>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                </tr>
+            </table>
+            <div class="catatan-row"><label>Catatan:</label><input type="text" class="input-element i-cat" value="Solat berjemaah di surau."><div class="catatan-line pdf-only p-cat"></div></div>
+
+            <div class="section-title">2. 3K (KEBERSIHAN & KECERIAAN)</div>
+            <table>
+                <tr><th>Kamar</th><th>Tandas</th><th>B.Sakit</th><th>Surau</th><th>Dewan</th></tr>
+                <tr>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                </tr>
+            </table>
+            <div class="catatan-row"><label>Catatan:</label><input type="text" class="input-element i-cat" value="Kawasan asrama bersih."><div class="catatan-line pdf-only p-cat"></div></div>
+
+            <div class="section-title">3. PENYEDIAAN MAKANAN</div>
+            <table>
+                <tr><th>Sarapan</th><th>Tghari</th><th>Petang</th><th>Malam</th><th>Supper</th></tr>
+                <tr>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                </tr>
+            </table>
+            <div class="catatan-row"><label>Catatan:</label><input type="text" class="input-element i-cat" value="Menu mengikut jadual."><div class="catatan-line pdf-only p-cat"></div></div>
+
+            <div class="section-title">4. DISIPLIN & PERGERAKAN</div>
+            <table>
+                <tr><th>Surau</th><th>Makan</th><th>Prep</th><th>Riadah</th><th>Lights Off</th></tr>
+                <tr>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                    <td><select class="input-element s-val"><option>-</option><option selected>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><span class="pdf-only p-val"></span></td>
+                </tr>
+            </table>
+            <div class="catatan-row"><label>Catatan:</label><input type="text" class="input-element i-cat" value="Pelajar mematuhi arahan."><div class="catatan-line pdf-only p-cat"></div></div>
+
+            <div class="report-box"><label>Pelajar Sakit/MC:</label><input type="text" id="iSakit" class="input-element" value="Tiada"><div class="report-text pdf-only" id="pSakit"></div></div>
+            <div class="report-box"><label>Hal-lain / Laporan Keseluruhan:</label><input type="text" id="iLain" class="input-element" value="Semua aktiviti berjalan lancar."><div class="report-text pdf-only" id="pLain"></div></div>
+
+            <div class="signature-section">
+                <div class="sig-box"><p style="font-size:0.65em; margin-bottom:15px;">Disediakan oleh:</p><div class="sig-line" id="outW1"></div><span style="font-size:0.65em;">Warden 1</span></div>
+                <div class="sig-box"><p style="font-size:0.65em; margin-bottom:15px;">Disediakan oleh:</p><div class="sig-line" id="outW2"></div><span style="font-size:0.65em;">Warden 2</span></div>
+            </div>
+        </div>
+
+        <div class="image-column">
+            <div class="lampiran-title">LAMPIRAN BERGAMBAR</div>
+            <div class="image-group"><div class="img-label">Aktiviti / Solat</div><div class="upload-box"><input type="file" accept="image/*" onchange="previewImg(event, 'p1')"><img id="p1" class="img-preview" onclick="resetImg('p1')"></div></div>
+            <div class="image-group"><div class="img-label">Dewan Makan</div><div class="upload-box"><input type="file" accept="image/*" onchange="previewImg(event, 'p2')"><img id="p2" class="img-preview" onclick="resetImg('p2')"></div></div>
+            <div class="image-group"><div class="img-label">Prep / Riadah</div><div class="upload-box"><input type="file" accept="image/*" onchange="previewImg(event, 'p3')"><img id="p3" class="img-preview" onclick="resetImg('p3')"></div></div>
+        </div>
+    </div>
+</div>
+
+<button class="btn-save" onclick="hantarLaporan()">Hantar Laporan & Simpan ke Drive</button>
+
+<div style="text-align:center; margin:20px 0;"><a href="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec?v=dashboard" target="_blank" rel="noopener" style="color:#666; font-size:12px;">Buka Dashboard Analisis</a></div>
+
+<script>
+    // GitHub Pages frontend: data and PDF storage remain in the existing GAS backend.
+    const WARDEN_API_URL = "https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbxZJWRgYNCdohjAdFySnURZfk73dR9XzC_IRt2FKAHWuPOYiIO273Ni01OcECBckPJK/exec";
+    const WARDEN_PARENT_ORIGIN = "https://smadjiwa.github.io";
+    let wardenRequestPending = false;
+
+    window.onload = function() {
+        loadWardenList();
+        const today = new Date();
+        document.getElementById('dateInput').value = today.toISOString().split('T')[0];
+        updateDate();
+        syncPDF();
+    };
+
+    function loadWardenList() {
+        const callbackName = "wardenListCallback";
+        window[callbackName] = function(list) {
+            const w1 = document.getElementById('warden1');
+            const w2 = document.getElementById('warden2');
+            w1.innerHTML = '';
+            w2.innerHTML = '';
+            w1.add(new Option("-- Pilih Warden 1 --", ""));
+            w2.add(new Option("-- (Pilihan) Warden 2 --", ""));
+            (Array.isArray(list) ? list : []).forEach(n => {
+                w1.add(new Option(n, n));
+                w2.add(new Option(n, n));
+            });
+            delete window[callbackName];
+            const script = document.getElementById('warden-list-script');
+            if (script) script.remove();
+            if (!Array.isArray(list)) alert("Tidak berjaya mendapatkan senarai warden.");
+        };
+
+        const script = document.createElement('script');
+        script.id = 'warden-list-script';
+        script.onerror = function() {
+            alert("Gagal mendapatkan senarai warden. Semak deployment GAS dan kebenaran akses.");
+            script.remove();
+        };
+        script.src = WARDEN_API_URL + "?action=listWarden&callback=" + callbackName + "&_=" + Date.now();
+        document.head.appendChild(script);
+    }
+
+    // Terima keputusan simpanan daripada halaman respons GAS di iframe tersembunyi.
+    window.addEventListener('message', function(event) {
+        const senderHost = (() => {
+            try { return new URL(event.origin).hostname; } catch (_) { return ''; }
+        })();
+        const trustedSender = senderHost === 'script.google.com' ||
+            senderHost.endsWith('.googleusercontent.com');
+        if (!trustedSender) return;
+        if (!event.data || event.data.type !== 'WARDEN_UPLOAD_RESULT') return;
+        wardenRequestPending = false;
+        document.getElementById('loader').style.display = "none";
+        document.body.classList.remove('generating-pdf');
+        alert(event.data.message || "Permintaan selesai.");
+    });
+
+    function updateDate() {
+        const val = document.getElementById('dateInput').value;
+        if(!val) return;
+        const days = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+        const d = new Date(val + 'T00:00:00');
+        document.getElementById('daySelect').value = days[d.getDay()];
+        const p = val.split('-');
+        document.getElementById('pDate').innerText = `${p[2]}/${p[1]}/${p[0]}`;
+        document.getElementById('pHari').innerText = days[d.getDay()];
+    }
+
+    function syncPDF() {
+        const n1 = document.getElementById('warden1').value;
+        const n2 = document.getElementById('warden2').value;
+        document.getElementById('outW1').innerText = n1 ? n1.toUpperCase() : "( NAMA WARDEN 1 )";
+        document.getElementById('outW2').innerText = n2 ? n2.toUpperCase() : "( TIADA )";
+        document.getElementById('pW1').innerText = n1;
+        document.getElementById('pW2').innerText = n2 || "TIADA";
+        document.getElementById('pSesi').innerText = document.getElementById('sesiSelect').value;
+    }
+
+    function previewImg(event, id) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById(id);
+                img.src = e.target.result;
+                img.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function resetImg(id) {
+        const img = document.getElementById(id);
+        if(confirm("Padam?")) {
+            img.src = "";
+            img.style.display = "none";
+            img.previousElementSibling.value = "";
+        }
+    }
+
+    async function hantarLaporan() {
+        if (wardenRequestPending) return;
+        if(!document.getElementById('warden1').value) return alert("Pilih Warden 1!");
+
+        const loader = document.getElementById('loader');
+        loader.style.display = "flex";
+        syncPDF();
+
+        document.querySelectorAll('.s-val').forEach((s, i) => {
+            document.querySelectorAll('.p-val')[i].innerText = s.value;
+        });
+        document.querySelectorAll('.i-cat').forEach((ci, i) => {
+            document.querySelectorAll('.p-cat')[i].innerText = ci.value;
+        });
+        document.getElementById('pSakit').innerText = document.getElementById('iSakit').value;
+        document.getElementById('pLain').innerText = document.getElementById('iLain').value;
+
+        try {
+            document.body.classList.add('generating-pdf');
+            const element = document.getElementById('reportContent');
+            const opt = {
+                margin: 0,
+                filename: 'temp.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+            const p = document.getElementById('dateInput').value.split('-');
+            const info = {
+                filename: `${p[1]}${p[2]}${p[0]} - ${document.getElementById('warden1').value.toUpperCase()}.pdf`,
+                tarikh: document.getElementById('dateInput').value,
+                hari: document.getElementById('daySelect').value,
+                warden1: document.getElementById('warden1').value,
+                warden2: document.getElementById('warden2').value || "TIADA"
+            };
+
+            submitPdfToGas(pdfBase64, info);
+        } catch (error) {
+            loader.style.display = "none";
+            document.body.classList.remove('generating-pdf');
+            alert("Gagal menjana PDF: " + error.message);
+        }
+    }
+
+    function submitPdfToGas(pdfBase64, info) {
+        let frame = document.getElementById('warden-upload-frame');
+        if (!frame) {
+            frame = document.createElement('iframe');
+            frame.name = 'warden-upload-frame';
+            frame.id = 'warden-upload-frame';
+            frame.style.display = 'none';
+            document.body.appendChild(frame);
+        }
+
+        let form = document.getElementById('warden-upload-form');
+        if (form) form.remove();
+        form = document.createElement('form');
+        form.id = 'warden-upload-form';
+        form.method = 'POST';
+        form.action = WARDEN_API_URL;
+        form.target = 'warden-upload-frame';
+        form.style.display = 'none';
+
+        const fields = {
+            action: 'uploadReport',
+            pdfBase64: pdfBase64,
+            info: JSON.stringify(info),
+            parentOrigin: WARDEN_PARENT_ORIGIN
+        };
+        Object.entries(fields).forEach(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        wardenRequestPending = true;
+        form.submit();
+    }
+</script>
+</body>
+</html>
